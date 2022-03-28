@@ -23,8 +23,8 @@ func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
 	}
 
 	var id int
-	createListQuery := fmt.Sprintf("INSERT INTO %s (title, description) VALUES ($1, $2) RETURNING id", todoListsTable)
-	row := tx.QueryRow(createListQuery, list.Title, list.Description)
+	createListQuery := fmt.Sprintf("INSERT INTO %s (title, description, time, done) VALUES ($1, $2, $3, $4) RETURNING id", todoListsTable)
+	row := tx.QueryRow(createListQuery, list.Title, list.Description, list.Time, list.Done)
 	if err := row.Scan(&id); err != nil {
 		tx.Rollback()
 		return 0, err
@@ -43,8 +43,10 @@ func (r *TodoListPostgres) Create(userId int, list todo.TodoList) (int, error) {
 func (r *TodoListPostgres) GetAll(userId int) ([]todo.TodoList, error) {
 	var lists []todo.TodoList
 
-	query := fmt.Sprintf("SELECT tl.id, tl.title, tl.description FROM %s tl INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1", todoListsTable, usersListsTable)
+	query := fmt.Sprintf(`SELECT tl.id, tl.title, tl.description, tl.done, tl.time FROM %s tl INNER JOIN %s ul on tl.id = ul.list_id WHERE ul.user_id = $1`, todoListsTable, usersListsTable)
 	err := r.db.Select(&lists, query, userId)
+
+	logrus.Print(lists)
 
 	return lists, err
 }

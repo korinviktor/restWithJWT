@@ -2,6 +2,6 @@ port: "8000"
 
 db:
   host: "localhost"
-  dbname: "todo_dev"
+  dbname: "taxi_dev"
   sslmode: "disable"
 
